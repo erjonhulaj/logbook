@@ -22,8 +22,8 @@ class Entry:
 # Path to the logbook data file.
 DATA_FILE = os.path.expanduser("~/.logbook/logbook.json")
 
-# Create the storage directory if it doesn't exist yet
 def save_entry(entry: Entry):
+    # Create the storage directory if it doesn't exist yet
     os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
 
     entries = load_entries()
@@ -40,6 +40,7 @@ def load_entries ():
     with open(DATA_FILE, "r") as f:
         return json.load(f)
     
+# Print an entry in a readable format.
 def print_entry(entry: dict):
     print(f"Type: {entry['type']}")
     print(f"What: {entry['what']}")
@@ -49,23 +50,25 @@ def print_entry(entry: dict):
     print(f"Timestamp: {entry['timestamp']}")
     print("-" * 40)
 
+# Command-line interface using Click
 @click.group()
 def cli():
     pass
 
-
+# Command to add and save a new entry to the logbook.
 @cli.command()
 def add():
-    type = click.prompt("Type (e.g. decision, action, event)")
+    entry_type = click.prompt("Type (e.g. decision, action, event)")
     what = click.prompt("What happened?")
     why = click.prompt("Why did it happen?")
     alternatives = click.prompt("What were the alternatives?")
     tags = click.prompt("Tags (comma separated)").split(",")
 
-    entry = Entry(type=type, what=what, why=why, alternatives=alternatives, tags=[tag.strip() for tag in tags])
+    entry = Entry(type=entry_type, what=what, why=why, alternatives=alternatives, tags=[tag.strip() for tag in tags])
     save_entry(entry)
     print("Entry saved!")
 
+# Command to view all entries in the logbook.
 @cli.command()
 def view():
     entries = load_entries()
@@ -75,18 +78,6 @@ def view():
     
     for entry in entries:
         print_entry(entry)
-
-@cli.command()
-def save():
-    entries = load_entries()
-    if not entries:
-        print("No entries to save.")
-        return
-    
-    with open("logbook_backup.json", "w") as f:
-        json.dump(entries, f, indent=2)
-    
-    print("Entries saved to logbook_backup.json")
 
 if __name__ == "__main__":
     cli()
