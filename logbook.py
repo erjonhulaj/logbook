@@ -59,11 +59,13 @@ def print_entry(entry: dict):
 # Command-line interface using Click
 @click.group()
 def cli():
+    """Logbook - your local decision and achievement log."""
     pass
 
 # Command to add and save a new entry to the logbook.
 @cli.command()
 def add():
+    """Add a new logbook entry (decision or win)."""
     entry_type = click.prompt("Type (decision/win)")
     what = click.prompt("What happened?")
     
@@ -97,6 +99,7 @@ def add():
 @click.option("--tags", default=None, help="Filter by tags (comma separated)")
 
 def view(entry_type, limit, tags):
+    """View logbook entries with optional filtering."""
     entries = load_entries()
     
     if entry_type:
@@ -116,6 +119,7 @@ def view(entry_type, limit, tags):
 @cli.command()
 @click.argument("query")
 def search(query):
+    """Search logbook entries by keyword."""
     entries = load_entries()
     query = query.lower()
     results = []
@@ -138,6 +142,7 @@ def search(query):
 @cli.command()
 @click.option("--output", default="logbook.md", help="Output file for markdown export")
 def export(output):
+    """Export logbook entries to a markdown file."""
     entries = load_entries()
     with open(output, "w") as f:
         for entry in entries:
