@@ -45,8 +45,13 @@ def load_entries ():
 def print_entry(entry: dict):
     print(f"Type: {entry['type']}")
     print(f"What: {entry['what']}")
-    print(f"Why: {entry['why']}")
-    print(f"Alternatives: {entry['alternatives']}")
+
+    if entry.get("why"):
+        print(f"Why: {entry['why']}")
+    if entry.get("alternatives"):
+        print(f"Alternatives: {entry['alternatives']}")
+    if entry.get("context"):
+        print(f"Context: {entry['context']}")
     print(f"Tags: {', '.join(entry['tags'])}")
     print(f"Timestamp: {entry['timestamp']}")
     print("-" * 40)
@@ -87,14 +92,27 @@ def add():
 
 # Command to view all entries in the logbook.
 @cli.command()
-def view():
+@click.option("--type", "entry_type", default=None, help="Filter by entry type (e.g. decision, win)")
+@click.option("--limit", default=10, help="Limit the number of entries displayed")
+@click.option("--tags", default=None, help="Filter by tags (comma separated)")
+
+def view(entry_type, limit, tags):
     entries = load_entries()
+    
+    if entry_type:
+        entries = [e for e in entries if e["type"] == entry_type]
+    
+    if tags:
+        filter_tags = set(tag.strip() for tag in tags.split(","))
+        entries = [e for e in entries if filter_tags.intersection(set(e["tags"]))]
+    
     if not entries:
         print("No entries found.")
         return
     
-    for entry in entries:
+    for entry in entries[:limit]:
         print_entry(entry)
+    
 
 if __name__ == "__main__":
     cli()
