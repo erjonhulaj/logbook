@@ -112,6 +112,27 @@ def view(entry_type, limit, tags):
     
     for entry in entries[:limit]:
         print_entry(entry)
+
+@cli.command()
+@click.argument("query")
+def search(query):
+    entries = load_entries()
+    query = query.lower()
+    results = []
+    
+    for entry in entries:
+        if (query in entry["what"].lower() or
+            query in entry.get("why", "").lower() or
+            query in entry.get("alternatives", "").lower() or
+            query in entry.get("context", "").lower()):
+            results.append(entry)
+    
+    if not results:
+        print("No matching entries found.")
+        return
+    
+    for entry in results:
+        print_entry(entry)
     
 
 if __name__ == "__main__":
