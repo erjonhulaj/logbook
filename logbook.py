@@ -97,10 +97,25 @@ def add():
 @click.option("--type", "entry_type", default=None, help="Filter by entry type (e.g. decision, win)")
 @click.option("--limit", default=10, help="Limit the number of entries displayed")
 @click.option("--tags", default=None, help="Filter by tags (comma separated)")
+@click.option("--date", default=None, help="Filter by date (YYYY-MM-DD)")
+@click.option("--month", default=None, help="Filter by month (YYYY-MM)")
+@click.option("--year", default=None, help="Filter by year (YYYY)")
+@click.option("--range", "date_range", nargs=2, default=None, help="Filter by date range (start end, format YYYY-MM-DD)")
 
-def view(entry_type, limit, tags):
+
+def view(entry_type, limit, tags, date, month, year, date_range):
     """View logbook entries with optional filtering."""
     entries = load_entries()
+
+    if date:
+        entries = [e for e in entries if e["timestamp"].startswith(date)]
+    if month:
+        entries = [e for e in entries if e["timestamp"].startswith(month)]
+    if year:
+        entries = [e for e in entries if e["timestamp"].startswith(year)]
+    if date_range:
+        start_date, end_date = date_range
+        entries = [e for e in entries if start_date <= e["timestamp"][:10] <= end_date]
     
     if entry_type:
         entries = [e for e in entries if e["type"] == entry_type]
@@ -116,6 +131,7 @@ def view(entry_type, limit, tags):
     for entry in entries[:limit]:
         print_entry(entry)
 
+# Command to search entries by keyword in any of the fields.å
 @cli.command()
 @click.argument("query")
 def search(query):
@@ -139,6 +155,7 @@ def search(query):
     for entry in results:
         print_entry(entry)
 
+# Command to export entries to a markdown file.
 @cli.command()
 @click.option("--output", default="logbook.md", help="Output file for markdown export")
 def export(output):
