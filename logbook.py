@@ -15,6 +15,7 @@ class Entry:
     alternatives: str
     tags: List[str]
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+    context: str = ""
 
 
 # Save an entry to the logbook.
@@ -60,11 +61,27 @@ def cli():
 def add():
     entry_type = click.prompt("Type (e.g. decision, action, event)")
     what = click.prompt("What happened?")
-    why = click.prompt("Why did it happen?")
-    alternatives = click.prompt("What were the alternatives?")
+    
+    if entry_type == "decision":
+        why = click.prompt("Why did you make this decision?")
+        alternatives = click.prompt("What alternatives did you consider?")
+    elif entry_type == "win":
+        context = click.prompt("What's the context? (project, topic, etc.)")
+    else:
+        print("Unknown entry type. Please choose 'decision' or 'win'.")
+        return
+   
     tags = click.prompt("Tags (comma separated)").split(",")
-
-    entry = Entry(type=entry_type, what=what, why=why, alternatives=alternatives, tags=[tag.strip() for tag in tags])
+    # Remove extra spaces and empty tags
+    tags = [tag.strip() for tag in tags if tag.strip()]
+    entry = Entry(
+        type=entry_type,
+        what=what,
+        why=why if entry_type == "decision" else "",
+        alternatives=alternatives if entry_type == "decision" else "",
+        tags=tags,
+        context=context if entry_type == "win" else ""
+    )
     save_entry(entry)
     print("Entry saved!")
 
