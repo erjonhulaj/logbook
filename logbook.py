@@ -64,7 +64,7 @@ def cli():
 # Command to add and save a new entry to the logbook.
 @cli.command()
 def add():
-    entry_type = click.prompt("Type (e.g. decision, action, event)")
+    entry_type = click.prompt("Type (decision/win)")
     what = click.prompt("What happened?")
     
     if entry_type == "decision":
