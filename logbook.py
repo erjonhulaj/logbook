@@ -124,7 +124,8 @@ def search(query):
         if (query in entry["what"].lower() or
             query in entry.get("why", "").lower() or
             query in entry.get("alternatives", "").lower() or
-            query in entry.get("context", "").lower()):
+            query in entry.get("context", "").lower() or
+            query in " ".join(entry["tags"]).lower()):
             results.append(entry)
     
     if not results:
@@ -133,7 +134,26 @@ def search(query):
     
     for entry in results:
         print_entry(entry)
-    
+
+@cli.command()
+@click.option("--output", default="logbook.md", help="Output file for markdown export")
+def export(output):
+    entries = load_entries()
+    with open(output, "w") as f:
+        for entry in entries:
+            f.write(f"## [{entry['type']}] {entry['timestamp']}\n\n")
+            f.write(f"**What:** {entry['what']}\n\n")
+            if entry.get("why"):
+                f.write(f"**Why:** {entry['why']}\n\n")
+            if entry.get("alternatives"):
+                f.write(f"**Alternatives:** {entry['alternatives']}\n\n")
+            if entry.get("context"):
+                f.write(f"**Context:** {entry['context']}\n\n")
+            if entry.get("tags"):
+                f.write(f"**Tags:** {', '.join(entry['tags'])}\n\n")
+            f.write("---\n\n")
+    print(f"Exported {len(entries)} entries to {output}")
+        
 
 if __name__ == "__main__":
     cli()
